@@ -15,7 +15,7 @@
  */
 
 import QtQuick 2.7
-//import Ubuntu.Components 1.3
+import Ubuntu.Components 1.3
 //import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
 import Qt.labs.settings 1.0
@@ -23,7 +23,7 @@ import io.thp.pyotherside 1.3
 
  Rectangle{
     id: root
-
+    color: "#515151"
 
     width: 1080
     height: 1920
@@ -35,6 +35,7 @@ import io.thp.pyotherside 1.3
       anchors.left: parent.left
       anchors.top: parent.top
       anchors.right: parent.right
+      radius: 3
       Rectangle{
         color: "white"
         anchors.fill: parent
@@ -43,18 +44,19 @@ import io.thp.pyotherside 1.3
         anchors.bottomMargin: 1/5 * parent.height
         anchors.leftMargin: 1/5 * parent.height
         anchors.rightMargin: 1/5 * parent.height
+        radius: 15
         TextInput{
           id: adress
           anchors.fill: parent
           anchors.topMargin: parent.height / 3
           anchors.leftMargin: 1/5 * parent.height
           anchors.centerIn: parent
-          font.pointSize: 20
           text: "gemini://gemini.circumlunar.space/servers/"
 
 
         }
         Rectangle{
+          id: searchRec
           width: adress.height
           height: adress.height
 
@@ -64,6 +66,7 @@ import io.thp.pyotherside 1.3
 
 
           Image{
+            id: search
             source: "../assets/search.png"
             anchors.fill: parent
             anchors.centerIn: parent
@@ -71,10 +74,52 @@ import io.thp.pyotherside 1.3
           }
           MouseArea {
               anchors.fill: parent
+              onPressed: {
+                search.scale = 0.8
+              }
               onReleased: {
                 python.call('gemini.main', [adress.text], function(returnValue) {
                     content.text = returnValue;
                 })
+                python.call('gemini.history', [adress.text], function(returnValue) {
+                    console.log("");
+                })
+                python.call('gemini.where_am_I', ["forward"], function(returnValue) {
+                    console.log("");
+                })
+                search.scale = 1
+              }
+          }
+        }
+        Rectangle{
+          width: adress.height
+          height: adress.height
+
+          anchors.right: searchRec.left
+          anchors.rightMargin: 1/5 * parent.height
+          anchors.verticalCenter: parent.verticalCenter
+
+
+          Image{
+            id: back
+            source: "../assets/arrow.png"
+            anchors.fill: parent
+            anchors.centerIn: parent
+
+          }
+          MouseArea {
+              anchors.fill: parent
+              onPressed: {
+                back.scale = 0.8
+              }
+              onReleased: {
+                python.call('gemini.back', [], function(returnValue) {
+                    adress.text = returnValue;
+                    python.call('gemini.main', [adress.text], function(returnValue) {
+                        content.text = returnValue;
+                    })
+                })
+                back.scale = 1
               }
           }
         }
@@ -82,6 +127,7 @@ import io.thp.pyotherside 1.3
     }
     Flickable {
         id: flick
+
         anchors.left: parent.left
         anchors.top: searchbar.bottom
         anchors.right: parent.right
@@ -90,14 +136,17 @@ import io.thp.pyotherside 1.3
         Text{
           id: content
           width: root.width
-
+          color: "#FFFFFFFF"
           textFormat : Text.RichText
-          font.pointSize: 20
-          minimumPointSize: 10
-          fontSizeMode: Text.HorizontalFit
+          font.pointSize: 35
           wrapMode: Text.WordWrap
-
           onLinkActivated: {
+            python.call('gemini.history', [link], function(returnValue) {
+                console.log("");
+            })
+            python.call('gemini.where_am_I', ["forward"], function(returnValue) {
+                console.log("");
+            })
             python.call('gemini.main', [link], function(returnValue) {
                 content.text = returnValue;
                 adress.text = link
@@ -118,6 +167,12 @@ import io.thp.pyotherside 1.3
                 console.log('module imported');
                 python.call('gemini.main', ['gemini://gemini.circumlunar.space/servers/'], function(returnValue) {
                     content.text = returnValue;
+                })
+                python.call('gemini.where_am_I', ['forward'], function(returnValue) {
+                    console.log("");
+                })
+                python.call('gemini.history', ['gemini://gemini.circumlunar.space/servers/'], function(returnValue) {
+                    console.log("");
                 })
             });
         }

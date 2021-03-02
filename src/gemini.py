@@ -12,6 +12,11 @@ import ssl
 import tempfile
 import textwrap
 import urllib.parse
+def makeDirs():
+    try:
+        os.mkdir("/home/phablet/.local/share/gem.aaron/")
+    except:
+        pass
 
 def absolutise_url(base, relative):
     # Absolutise relative links
@@ -65,27 +70,126 @@ def get_links(body, url):
 
 
 
-def instert_md_links(body, links):
+def instert_html_links(body, links):
     mdBody = ""
     for line in body.splitlines():
         if "=>" in line:
             try:
-                line =  '<a href="'+links[0]+'">'+line+'</a>'
+                line =  '<a style="color: #FFC0CB" href="'+links[0]+'">'+line+'</a>'
                 del links[0]
                 mdBody += line
+                mdBody += "<br>"
                 mdBody += "<br>"
                 #print("here")
             except:
                 mdBody += line
                 #print("err")
                 pass
+        elif line.startswith("#"):
+            if line.startswith("###"):
+                line = line.replace("###", "<h3>")
+                line += "</h3>"
+                mdBody += line
+            elif line.startswith("##"):
+                line = line.replace("##", "<h2>")
+                line += "</h2>"
+                mdBody += line
+            elif line.startswith("#"):
+                line = line.replace("#", "<h1>")
+                line += "</h1>"
+                mdBody += line
+            else:
+                pass
+
         else:
             #print("nolink")
             mdBody += line + "\n"
             mdBody += "<br>"
+            mdBody += "<br>"
     return mdBody
 
 
+def where_am_I(direction):
+    try:
+        try:
+            makeDirs()
+            f = open("where_am_I.txt", "r")
+        except:
+            makeDirs()
+            f = open("/home/phablet/.local/share/gem.aaron/where_am_I.txt", "r")
+    except:
+        try:
+            makeDirs()
+            f = open("where_am_I.txt", "w+")
+        except:
+            makeDirs()
+            f = open("/home/phablet/.local/share/gem.aaron/where_am_I.txt", "w+")
+    current = f.read()
+
+    if direction == "forward":
+        try:
+            current =int(current) + 1
+        except:
+            current = int(0)
+    if direction == "backward" and int(current) > 0:
+        try:
+            current =int(current) - 1
+        except:
+            current = int(0)
+
+    f.close()
+    try:
+        f = open("where_am_I.txt", "w")
+    except:
+        f = open("/home/phablet/.local/share/gem.aaron/where_am_I.txt", "w")
+    f.write(str(current))
+
+
+    f.close()
+    return current
+
+def history(url):
+    try:
+        makeDirs()
+        f = open("history.txt", "a")
+    except:
+        makeDirs()
+        f = open("/home/phablet/.local/share/gem.aaron/history.txt", "a")
+    f.write(","+url)
+    f.close()
+
+def back():
+    index = where_am_I("backward")
+    try:
+        makeDirs()
+        f = open("history.txt", "r")
+    except:
+        makeDirs()
+        f = open("/home/phablet/.local/share/gem.aaron/history.txt", "r")
+    history = f.read().split(",")
+    url = history[index+1]
+    f.close()
+    try:
+        makeDirs()
+        f = open("history.txt", "w")
+    except:
+        makeDirs()
+        f = open("/home/phablet/.local/share/gem.aaron/history.txt", "w")
+    newHist = "" #were rewriting history lmao
+    for element in history[1:index+2]:
+         newHist += "," + element
+    f.write(newHist)
+    f.close()
+
+    return str(url)
 
 def main(url):
-    return instert_md_links(get_site(url),get_links(get_site(url), url))
+    try:
+        returnValue = instert_html_links(get_site(url),get_links(get_site(url), url))
+#        where_am_I("forward")
+#        history(url)
+        return returnValue
+    except:
+#        where_am_I("forward")
+#        history(url)
+        return "uhm... seems like this site does not exist, it might also be bug <br> ¯\_( ͡❛ ͜ʖ ͡❛)_/¯"
