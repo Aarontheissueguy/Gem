@@ -1,6 +1,6 @@
 # Gem
 
-A Qml frontend for Agunua
+A Gemini client for Ubuntu Touch
 
 ## License
 
