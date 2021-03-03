@@ -78,6 +78,7 @@ import io.thp.pyotherside 1.3
                 search.scale = 0.8
               }
               onReleased: {
+                content.text = "<center>Loading.. Stay calm!</center> <br> <center>(っ⌒‿⌒)っ</center>"
                 python.call('gemini.main', [adress.text], function(returnValue) {
                     content.text = returnValue;
                 })
@@ -113,6 +114,7 @@ import io.thp.pyotherside 1.3
                 back.scale = 0.8
               }
               onReleased: {
+                content.text = "<center>Loading.. Stay calm!</center> <br> <center>(っ⌒‿⌒)っ</center>"
                 python.call('gemini.back', [], function(returnValue) {
                     adress.text = returnValue;
                     python.call('gemini.main', [adress.text], function(returnValue) {
@@ -141,6 +143,7 @@ import io.thp.pyotherside 1.3
           font.pointSize: 35
           wrapMode: Text.WordWrap
           onLinkActivated: {
+            content.text = "<center>Loading.. Stay calm!</center> <br> <center>(っ⌒‿⌒)っ</center>"
             python.call('gemini.history', [link], function(returnValue) {
                 console.log("");
             })
