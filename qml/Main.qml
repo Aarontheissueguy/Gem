@@ -80,7 +80,8 @@ import io.thp.pyotherside 1.3
               onReleased: {
                 content.text = "<center>Loading.. Stay calm!</center> <br> <center>(っ⌒‿⌒)っ</center>"
                 python.call('gemini.main', [adress.text], function(returnValue) {
-                    content.text = returnValue;
+                    console.assert(returnValue.status === 'success', returnValue.message);
+                    content.text = returnValue.content;
                 })
                 python.call('gemini.history', [adress.text], function(returnValue) {
                     console.log("");
@@ -118,7 +119,8 @@ import io.thp.pyotherside 1.3
                 python.call('gemini.back', [], function(returnValue) {
                     adress.text = returnValue;
                     python.call('gemini.main', [adress.text], function(returnValue) {
-                        content.text = returnValue;
+                        console.assert(returnValue.status === 'success', returnValue.message);
+                        content.text = returnValue.content;
                     })
                 })
                 back.scale = 1
