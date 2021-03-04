@@ -80,7 +80,8 @@ import io.thp.pyotherside 1.3
               onReleased: {
                 content.text = "<center>Loading.. Stay calm!</center> <br> <center>(っ⌒‿⌒)っ</center>"
                 python.call('gemini.main', [adress.text], function(returnValue) {
-                    content.text = returnValue;
+                    console.assert(returnValue.status === 'success', returnValue.message);
+                    content.text = returnValue.content;
                 })
                 python.call('gemini.history', [adress.text], function(returnValue) {
                     console.log("");
@@ -118,7 +119,8 @@ import io.thp.pyotherside 1.3
                 python.call('gemini.back', [], function(returnValue) {
                     adress.text = returnValue;
                     python.call('gemini.main', [adress.text], function(returnValue) {
-                        content.text = returnValue;
+                        console.assert(returnValue.status === 'success', returnValue.message);
+                        content.text = returnValue.content;
                     })
                 })
                 back.scale = 1
@@ -144,14 +146,12 @@ import io.thp.pyotherside 1.3
           wrapMode: Text.WordWrap
           onLinkActivated: {
             content.text = "<center>Loading.. Stay calm!</center> <br> <center>(っ⌒‿⌒)っ</center>"
-            python.call('gemini.history', [link], function(returnValue) {
-                console.log("");
-            })
-            python.call('gemini.where_am_I', ["forward"], function(returnValue) {
-                console.log("");
-            })
+            python.call('gemini.history', [link], function(returnValue) {})
+            python.call('gemini.where_am_I', ["forward"], function(returnValue) {})
             python.call('gemini.main', [link], function(returnValue) {
-                content.text = returnValue;
+                console.assert(returnValue.status === 'success', returnValue.message);
+
+                content.text = returnValue.content;
                 adress.text = link
             })
           }
@@ -169,14 +169,12 @@ import io.thp.pyotherside 1.3
             importModule('gemini', function() {
                 console.log('module imported');
                 python.call('gemini.main', ['gemini://gemini.circumlunar.space/servers/'], function(returnValue) {
-                    content.text = returnValue;
+                    console.assert(returnValue.status === 'success', returnValue.message);
+
+                    content.text = returnValue.content;
                 })
-                python.call('gemini.where_am_I', ['forward'], function(returnValue) {
-                    console.log("");
-                })
-                python.call('gemini.history', ['gemini://gemini.circumlunar.space/servers/'], function(returnValue) {
-                    console.log("");
-                })
+                python.call('gemini.where_am_I', ['forward'], function(returnValue) {})
+                python.call('gemini.history', ['gemini://gemini.circumlunar.space/servers/'], function(returnValue) {})
             });
         }
 
