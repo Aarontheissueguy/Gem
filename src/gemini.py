@@ -40,7 +40,7 @@ def get_site(url):
         fp = s.makefile("rb")
         header = fp.readline()
         header = header.decode("UTF-8").strip()
-        status, mime = header.split()
+        status, mime = header.split()[:2]
         # Handle input requests
         if status.startswith("1"):
             # Prompt
