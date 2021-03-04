@@ -185,11 +185,20 @@ def back():
 
 def main(url):
     try:
-        returnValue = instert_html_links(get_site(url),get_links(get_site(url), url))
+        gemsite = get_site(url)
+        returnValue = instert_html_links(gemsite, get_links(gemsite, url))
 #        where_am_I("forward")
 #        history(url)
-        return returnValue
-    except:
+        return {
+            'status': 'success',
+            'content': returnValue
+        }
+    except Exception as e:
 #        where_am_I("forward")
 #        history(url)
-        return "uhm... seems like this site does not exist, it might also be bug <br> ¯\_( ͡❛ ͜ʖ ͡❛)_/¯"
+        return {
+            'status': 'error',
+            'content': "uhm... seems like this site does not exist, it might also be bug <br> ¯\_( ͡❛ ͜ʖ ͡❛)_/¯",
+            'message': str(e)
+        }
+        return
