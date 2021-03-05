@@ -22,6 +22,9 @@ import Qt.labs.settings 1.0
 import io.thp.pyotherside 1.3
 
 MainView {
+  applicationName: "Gem"
+  backgroundColor: "#515151"
+
   Page {
       id: root
 
@@ -94,34 +97,28 @@ MainView {
         }
       }
       
-      Rectangle {
-        id: flickWrapper
+      Flickable {
+        id: flick
         anchors.fill: parent
-        color: "black"
+        contentHeight: content.paintedHeight
 
-        Flickable {
-          id: flick
-          anchors.fill: parent
-          contentHeight: content.paintedHeight
+        Text{
+          id: content
+          width: root.width
+          color: "#FFFFFFFF"
+          textFormat : Text.RichText
+          font.pointSize: 35
+          wrapMode: Text.WordWrap
+          onLinkActivated: {
+            content.text = "<center>Loading.. Stay calm!</center> <br> <center>(っ⌒‿⌒)っ</center>"
+            python.call('gemini.history', [link], function(returnValue) {})
+            python.call('gemini.where_am_I', ["forward"], function(returnValue) {})
+            python.call('gemini.main', [link], function(returnValue) {
+                console.assert(returnValue.status === 'success', returnValue.message);
 
-          Text{
-            id: content
-            width: root.width
-            color: "#FFFFFFFF"
-            textFormat : Text.RichText
-            font.pointSize: 35
-            wrapMode: Text.WordWrap
-            onLinkActivated: {
-              content.text = "<center>Loading.. Stay calm!</center> <br> <center>(っ⌒‿⌒)っ</center>"
-              python.call('gemini.history', [link], function(returnValue) {})
-              python.call('gemini.where_am_I', ["forward"], function(returnValue) {})
-              python.call('gemini.main', [link], function(returnValue) {
-                  console.assert(returnValue.status === 'success', returnValue.message);
-
-                  content.text = returnValue.content;
-                  adress.text = link
-              })
-            }
+                content.text = returnValue.content;
+                adress.text = link
+            })
           }
         }
       }
