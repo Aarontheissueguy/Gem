@@ -75,7 +75,7 @@ MainView {
             leftMargin: 10
             rightMargin: 10
           }
-          
+
           onActiveFocusChanged: {
             if (activeFocus) {
               back.visible = false
@@ -101,11 +101,17 @@ MainView {
         }
       }
     }
-    
+
     Flickable {
       id: flick
       anchors.fill: parent
       contentHeight: content.paintedHeight
+
+      MouseArea {
+        // This is to remove focus from the address bar when tapping off of it
+        anchors.fill: parent
+        onClicked: forceActiveFocus()
+      }
 
       Text{
         id: content
