@@ -71,6 +71,7 @@ MainView {
             verticalAlignment: Qt.AlignVCenter
             horizontalAlignment: Qt.AlignLeft
             text: "gemini://gemini.circumlunar.space/servers/"
+            layer.enabled: true
 
             onActiveFocusChanged: {
               if (activeFocus) {
