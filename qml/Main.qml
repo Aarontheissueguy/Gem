@@ -26,125 +26,133 @@ MainView {
   backgroundColor: "#515151"
 
   Page {
-      id: root
+    id: root
 
-      header: PageHeader {
-        id: pageHeader
-        flickable: flick
-        exposed: true
-        leadingActionBar {
-          numberOfSlots: 1
-          actions: [
-            Action {
-              id: back
-              iconName: "back"
-              onTriggered: {
-                content.text = "<center>Loading.. Stay calm!</center> <br> <center>(っ⌒‿⌒)っ</center>"
-                python.call('gemini.back', [], function(returnValue) {
-                    adress.text = returnValue;
-                    python.call('gemini.main', [adress.text], function(returnValue) {
-                        console.assert(returnValue.status === 'success', returnValue.message);
-                        content.text = returnValue.content;
-                    })
-                })
-              }
-            }
-          ]
-        }
+    header: PageHeader {
+      id: pageHeader
+      flickable: flick
+      exposed: true
 
-        contents: Rectangle {
-          id: addressWrapper
-          radius: 15
-          color: "#F0F0F0"
-          anchors.fill: parent
-          anchors.topMargin: 15
-          anchors.bottomMargin: 15
+      leadingActionBar {
+        numberOfSlots: 1
+        actions: [
+          Action {
+            id: back
+            iconName: "back"
 
-          TextInput {
-            id: adress
-            anchors {
-              fill: parent
-              centerIn: parent
-              leftMargin: 10
-              rightMargin: 10
-            }
-            verticalAlignment: Qt.AlignVCenter
-            horizontalAlignment: Qt.AlignLeft
-            text: "gemini://gemini.circumlunar.space/servers/"
-            layer.enabled: true
-
-            onActiveFocusChanged: {
-              if (activeFocus) {
-                back.visible = false
-              } else {
-                back.visible = true
-              }
-            }
-
-            onAccepted: {
+            onTriggered: {
               content.text = "<center>Loading.. Stay calm!</center> <br> <center>(っ⌒‿⌒)っ</center>"
-              python.call('gemini.main', [adress.text], function(returnValue) {
+
+              python.call('gemini.back', [], function(returnValue) {
+                adress.text = returnValue;
+                python.call('gemini.main', [adress.text], function(returnValue) {
                   console.assert(returnValue.status === 'success', returnValue.message);
                   content.text = returnValue.content;
-              })
-              python.call('gemini.history', [adress.text], function(returnValue) {
-                  console.log("");
-              })
-              python.call('gemini.where_am_I', ["forward"], function(returnValue) {
-                  console.log("");
+                })
               })
             }
           }
-        }
+        ]
       }
-      
-      Flickable {
-        id: flick
+
+      contents: Rectangle {
+        id: addressWrapper
+        radius: 15
+        color: "#F0F0F0"
         anchors.fill: parent
-        contentHeight: content.paintedHeight
+        anchors.topMargin: 15
+        anchors.bottomMargin: 15
 
-        Text{
-          id: content
-          width: root.width
-          color: "#FFFFFFFF"
-          textFormat : Text.RichText
-          font.pointSize: 35
-          wrapMode: Text.WordWrap
-          onLinkActivated: {
+        TextInput {
+          id: adress
+          verticalAlignment: Qt.AlignVCenter
+          horizontalAlignment: Qt.AlignLeft
+          text: "gemini://gemini.circumlunar.space/servers/"
+          layer.enabled: true
+          anchors {
+            fill: parent
+            centerIn: parent
+            leftMargin: 10
+            rightMargin: 10
+          }
+          
+          onActiveFocusChanged: {
+            if (activeFocus) {
+              back.visible = false
+            } else {
+              back.visible = true
+            }
+          }
+
+          onAccepted: {
             content.text = "<center>Loading.. Stay calm!</center> <br> <center>(っ⌒‿⌒)っ</center>"
-            python.call('gemini.history', [link], function(returnValue) {})
-            python.call('gemini.where_am_I', ["forward"], function(returnValue) {})
-            python.call('gemini.main', [link], function(returnValue) {
-                console.assert(returnValue.status === 'success', returnValue.message);
 
-                content.text = returnValue.content;
-                adress.text = link
+            python.call('gemini.main', [adress.text], function(returnValue) {
+              console.assert(returnValue.status === 'success', returnValue.message);
+              content.text = returnValue.content;
+            })
+            python.call('gemini.history', [adress.text], function(returnValue) {
+              console.log("");
+            })
+            python.call('gemini.where_am_I', ["forward"], function(returnValue) {
+              console.log("");
             })
           }
         }
       }
+    }
+    
+    Flickable {
+      id: flick
+      anchors.fill: parent
+      contentHeight: content.paintedHeight
 
-      Python {
-          id: python
+      Text{
+        id: content
+        width: root.width
+        color: "#FFFFFFFF"
+        textFormat : Text.RichText
+        font.pointSize: 35
+        wrapMode: Text.WordWrap
 
-          Component.onCompleted: {
-              addImportPath(Qt.resolvedUrl('../src/'));
+        onLinkActivated: {
+          content.text = "<center>Loading.. Stay calm!</center> <br> <center>(っ⌒‿⌒)っ</center>"
 
-              importModule('gemini', function() {
-                  console.log('module imported');
-                  python.call('gemini.main', ['gemini://gemini.circumlunar.space/servers/'], function(returnValue) {
-                      console.assert(returnValue.status === 'success', returnValue.message);
+          python.call('gemini.history', [link], function(returnValue) {})
+          python.call('gemini.where_am_I', ["forward"], function(returnValue) {})
+          python.call('gemini.main', [link], function(returnValue) {
+            console.assert(returnValue.status === 'success', returnValue.message);
 
-                      content.text = returnValue.content;
-                  })
-                  python.call('gemini.where_am_I', ['forward'], function(returnValue) {})
-                  python.call('gemini.history', ['gemini://gemini.circumlunar.space/servers/'], function(returnValue) {})
-              });
-          }
-
-          onError: {
-              console.log('python error: ' + traceback);
-          }
+            content.text = returnValue.content;
+            adress.text = link
+          })
+        }
       }
+    }
+
+    Python {
+      id: python
+
+      Component.onCompleted: {
+        addImportPath(Qt.resolvedUrl('../src/'));
+
+        importModule('gemini', function() {
+          console.log('module imported');
+
+          python.call('gemini.main', ['gemini://gemini.circumlunar.space/servers/'], function(returnValue) {
+            console.assert(returnValue.status === 'success', returnValue.message);
+
+            content.text = returnValue.content;
+          })
+
+          python.call('gemini.where_am_I', ['forward'], function(returnValue) {})
+          python.call('gemini.history', ['gemini://gemini.circumlunar.space/servers/'], function(returnValue) {});
+        });
+      }
+
+      onError: {
+        console.log('python error: ' + traceback);
+      }
+    }
   }
 }
