@@ -22,7 +22,7 @@ import Qt.labs.settings 1.0
 import io.thp.pyotherside 1.3
 
 MainView {
-  applicationName: "Gem"
+  applicationName: "gem.aaron"
   backgroundColor: "#515151"
 
   Page {
