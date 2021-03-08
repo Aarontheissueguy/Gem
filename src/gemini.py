@@ -41,13 +41,13 @@ class Gemini:
         return f_data
 
     def save_data(self):
-        position_file = self.open_file("where_am_I.txt", "wb")
+        future_file = self.open_file("future.txt", "wb")
         history_file = self.open_file("history.txt", "wb")
 
-        position_file.write(str(self.position))
-        history_file.write(','.join(self.history))
+        future_file.write(self.future)
+        history_file.write(self.history)
 
-        position_file.close()
+        future_file.close()
         history_file.close()
 
     def makeDirs(self):
@@ -169,13 +169,27 @@ class Gemini:
 
         self.future.append(self.history.pop())
         url = self.top(self.history)
-        print('back', self.history)
+        
+        if len(self.future) > 0:
+            pyotherside.send('showForward')
+
+        return self.load(url)
+
+    def forward(self):
+        self.history.append(self.future.pop())
+        url = self.top(self.history)
+
+        if len(self.future) == 0:
+            pyotherside.send('hideForward')
 
         return self.load(url)
 
     def goto(self, url):
         self.history.append(url)
-        print('goto', self.history)
+
+        # Reset the future.
+        self.future = []
+        pyotherside.send('hideForward')
 
         return self.load(url)
 

@@ -34,11 +34,30 @@ MainView {
       exposed: true
 
       leadingActionBar {
-        numberOfSlots: 1
+        numberOfSlots: 2
         actions: [
           Action {
+            id: forward
+            iconName: "go-next"
+            visible: false
+
+            onTriggered: {
+              python.call('gemini.forward', [])
+            }
+
+            Component.onCompleted: {
+              python.setHandler('showForward', function() {
+                forward.visible = true
+              });
+
+              python.setHandler('hideForward', function() {
+                forward.visible = false
+              })
+            }
+          },
+          Action {
             id: back
-            iconName: "back"
+            iconName: "go-previous"
 
             onTriggered: {
               python.call('gemini.back', [])
