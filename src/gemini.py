@@ -67,6 +67,7 @@ class Gemini:
 
     def get_site(self, url):
         parsed_url = urllib.parse.urlparse(url)
+
         while True:
             s = socket.create_connection((parsed_url.netloc, 1965))
             context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
@@ -185,6 +186,9 @@ class Gemini:
         return self.load(url)
 
     def goto(self, url):
+        if url.split(':')[0] in ["https", "http:"]:
+            return pyotherside.send('externalUrl', url)
+
         self.history.append(url)
 
         # Reset the future.

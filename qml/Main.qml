@@ -145,6 +145,10 @@ MainView {
             content.text = gemsite;
           })
 
+          python.setHandler('externalUrl', function(url) {
+             Qt.openUrlExternally(url);
+          })
+
           // Load the homepage
           python.call('gemini.goto', ['gemini://gemini.circumlunar.space/servers/'])
         });
