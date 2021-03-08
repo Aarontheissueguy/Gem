@@ -22,7 +22,7 @@ import Qt.labs.settings 1.0
 import io.thp.pyotherside 1.3
 
 MainView {
-  applicationName: "Gem"
+  applicationName: "gem.aaron"
   backgroundColor: "#515151"
 
   Page {
@@ -41,15 +41,7 @@ MainView {
             iconName: "back"
 
             onTriggered: {
-              content.text = "<center>Loading.. Stay calm!</center> <br> <center>(っ⌒‿⌒)っ</center>"
-
-              python.call('gemini.back', [], function(returnValue) {
-                adress.text = returnValue;
-                python.call('gemini.main', [adress.text], function(returnValue) {
-                  console.assert(returnValue.status === 'success', returnValue.message);
-                  content.text = returnValue.content;
-                })
-              })
+              python.call('gemini.back', [])
             }
           }
         ]
@@ -85,18 +77,7 @@ MainView {
           }
 
           onAccepted: {
-            content.text = "<center>Loading.. Stay calm!</center> <br> <center>(っ⌒‿⌒)っ</center>"
-
-            python.call('gemini.main', [adress.text], function(returnValue) {
-              console.assert(returnValue.status === 'success', returnValue.message);
-              content.text = returnValue.content;
-            })
-            python.call('gemini.history', [adress.text], function(returnValue) {
-              console.log("");
-            })
-            python.call('gemini.where_am_I', ["forward"], function(returnValue) {
-              console.log("");
-            })
+            python.call('gemini.goto', [adress.text])
           }
         }
       }
@@ -122,16 +103,7 @@ MainView {
         wrapMode: Text.WordWrap
 
         onLinkActivated: {
-          content.text = "<center>Loading.. Stay calm!</center> <br> <center>(っ⌒‿⌒)っ</center>"
-
-          python.call('gemini.history', [link], function(returnValue) {})
-          python.call('gemini.where_am_I', ["forward"], function(returnValue) {})
-          python.call('gemini.main', [link], function(returnValue) {
-            console.assert(returnValue.status === 'success', returnValue.message);
-
-            content.text = returnValue.content;
-            adress.text = link
-          })
+          python.call('gemini.goto', [link])
         }
       }
     }
@@ -142,17 +114,20 @@ MainView {
       Component.onCompleted: {
         addImportPath(Qt.resolvedUrl('../src/'));
 
-        importModule('gemini', function() {
+        importNames('gemini', ['gemini'], function() {
           console.log('module imported');
 
-          python.call('gemini.main', ['gemini://gemini.circumlunar.space/servers/'], function(returnValue) {
-            console.assert(returnValue.status === 'success', returnValue.message);
-
-            content.text = returnValue.content;
+          python.setHandler('loading', function(url) {
+            content.text = "<center>Loading.. Stay calm!</center> <br> <center>(っ⌒‿⌒)っ</center>"
+            adress.text = url;
           })
 
-          python.call('gemini.where_am_I', ['forward'], function(returnValue) {})
-          python.call('gemini.history', ['gemini://gemini.circumlunar.space/servers/'], function(returnValue) {});
+          python.setHandler('onLoad', function(gemsite) {
+            content.text = gemsite;
+          })
+
+          // Load the homepage
+          python.call('gemini.goto', ['gemini://gemini.circumlunar.space/servers/'])
         });
       }
 
