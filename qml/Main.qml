@@ -21,165 +21,144 @@ import QtQuick.Layouts 1.3
 import Qt.labs.settings 1.0
 import io.thp.pyotherside 1.3
 
- Rectangle{
+MainView {
+  applicationName: "gem.aaron"
+  backgroundColor: "#515151"
+
+  Page {
     id: root
-    color: "#515151"
 
-    width: 1080
-    height: 1920
-    Rectangle {
-      id: searchbar
-      color: "grey"
-      z: 1
-      height: root.height / 12
-      anchors.left: parent.left
-      anchors.top: parent.top
-      anchors.right: parent.right
-      radius: 3
-      Rectangle{
-        color: "white"
-        anchors.fill: parent
-        anchors.centerIn: parent
-        anchors.topMargin: 1/5 * parent.height
-        anchors.bottomMargin: 1/5 * parent.height
-        anchors.leftMargin: 1/5 * parent.height
-        anchors.rightMargin: 1/5 * parent.height
-        radius: 15
-        TextInput{
-          id: adress
-          anchors.fill: parent
-          anchors.topMargin: parent.height / 3
-          anchors.leftMargin: 1/5 * parent.height
-          anchors.centerIn: parent
-          text: "gemini://gemini.circumlunar.space/servers/"
+    header: PageHeader {
+      id: pageHeader
+      flickable: flick
+      exposed: true
 
-
-        }
-        Rectangle{
-          id: searchRec
-          width: adress.height
-          height: adress.height
-
-          anchors.right: parent.right
-          anchors.rightMargin: 1/5 * parent.height
-          anchors.verticalCenter: parent.verticalCenter
-
-
-          Image{
-            id: search
-            source: "../assets/search.png"
-            anchors.fill: parent
-            anchors.centerIn: parent
-
-          }
-          MouseArea {
-              anchors.fill: parent
-              onPressed: {
-                search.scale = 0.8
-              }
-              onReleased: {
-                content.text = "<center>Loading.. Stay calm!</center> <br> <center>(っ⌒‿⌒)っ</center>"
-                python.call('gemini.main', [adress.text], function(returnValue) {
-                    console.assert(returnValue.status === 'success', returnValue.message);
-                    content.text = returnValue.content;
-                })
-                python.call('gemini.history', [adress.text], function(returnValue) {
-                    console.log("");
-                })
-                python.call('gemini.where_am_I', ["forward"], function(returnValue) {
-                    console.log("");
-                })
-                search.scale = 1
-              }
-          }
-        }
-        Rectangle{
-          width: adress.height
-          height: adress.height
-
-          anchors.right: searchRec.left
-          anchors.rightMargin: 1/5 * parent.height
-          anchors.verticalCenter: parent.verticalCenter
-
-
-          Image{
+      leadingActionBar {
+        numberOfSlots: 1
+        actions: [
+          Action {
             id: back
-            source: "../assets/arrow.png"
-            anchors.fill: parent
-            anchors.centerIn: parent
+            iconName: "back"
 
-          }
-          MouseArea {
-              anchors.fill: parent
-              onPressed: {
-                back.scale = 0.8
-              }
-              onReleased: {
-                content.text = "<center>Loading.. Stay calm!</center> <br> <center>(っ⌒‿⌒)っ</center>"
-                python.call('gemini.back', [], function(returnValue) {
-                    adress.text = returnValue;
-                    python.call('gemini.main', [adress.text], function(returnValue) {
-                        console.assert(returnValue.status === 'success', returnValue.message);
-                        content.text = returnValue.content;
-                    })
+            onTriggered: {
+              content.text = "<center>Loading.. Stay calm!</center> <br> <center>(っ⌒‿⌒)っ</center>"
+
+              python.call('gemini.back', [], function(returnValue) {
+                adress.text = returnValue;
+                python.call('gemini.main', [adress.text], function(returnValue) {
+                  console.assert(returnValue.status === 'success', returnValue.message);
+                  content.text = returnValue.content;
                 })
-                back.scale = 1
-              }
+              })
+            }
+          }
+        ]
+      }
+
+      contents: Rectangle {
+        id: addressWrapper
+        radius: 15
+        color: "#F0F0F0"
+        anchors.fill: parent
+        anchors.topMargin: 15
+        anchors.bottomMargin: 15
+
+        TextInput {
+          id: adress
+          verticalAlignment: Qt.AlignVCenter
+          horizontalAlignment: Qt.AlignLeft
+          text: "gemini://gemini.circumlunar.space/servers/"
+          layer.enabled: true
+          anchors {
+            fill: parent
+            centerIn: parent
+            leftMargin: 10
+            rightMargin: 10
+          }
+
+          onActiveFocusChanged: {
+            if (activeFocus) {
+              back.visible = false
+            } else {
+              back.visible = true
+            }
+          }
+
+          onAccepted: {
+            content.text = "<center>Loading.. Stay calm!</center> <br> <center>(っ⌒‿⌒)っ</center>"
+
+            python.call('gemini.main', [adress.text], function(returnValue) {
+              console.assert(returnValue.status === 'success', returnValue.message);
+              content.text = returnValue.content;
+            })
+            python.call('gemini.history', [adress.text], function(returnValue) {
+              console.log("");
+            })
+            python.call('gemini.where_am_I', ["forward"], function(returnValue) {
+              console.log("");
+            })
           }
         }
       }
     }
+
     Flickable {
-        id: flick
+      id: flick
+      anchors.fill: parent
+      contentHeight: content.paintedHeight
 
-        anchors.left: parent.left
-        anchors.top: searchbar.bottom
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        contentHeight: content.paintedHeight
-        Text{
-          id: content
-          width: root.width
-          color: "#FFFFFFFF"
-          textFormat : Text.RichText
-          font.pointSize: 35
-          wrapMode: Text.WordWrap
-          onLinkActivated: {
-            content.text = "<center>Loading.. Stay calm!</center> <br> <center>(っ⌒‿⌒)っ</center>"
-            python.call('gemini.history', [link], function(returnValue) {})
-            python.call('gemini.where_am_I', ["forward"], function(returnValue) {})
-            python.call('gemini.main', [link], function(returnValue) {
-                console.assert(returnValue.status === 'success', returnValue.message);
+      MouseArea {
+        // This is to remove focus from the address bar when tapping off of it
+        anchors.fill: parent
+        onClicked: forceActiveFocus()
+      }
 
-                content.text = returnValue.content;
-                adress.text = link
-            })
-          }
+      Text{
+        id: content
+        width: root.width
+        color: "#FFFFFFFF"
+        textFormat : Text.RichText
+        font.pointSize: 35
+        wrapMode: Text.WordWrap
+
+        onLinkActivated: {
+          content.text = "<center>Loading.. Stay calm!</center> <br> <center>(っ⌒‿⌒)っ</center>"
+
+          python.call('gemini.history', [link], function(returnValue) {})
+          python.call('gemini.where_am_I', ["forward"], function(returnValue) {})
+          python.call('gemini.main', [link], function(returnValue) {
+            console.assert(returnValue.status === 'success', returnValue.message);
+
+            content.text = returnValue.content;
+            adress.text = link
+          })
         }
-
-
+      }
     }
 
     Python {
-        id: python
+      id: python
 
-        Component.onCompleted: {
-            addImportPath(Qt.resolvedUrl('../src/'));
+      Component.onCompleted: {
+        addImportPath(Qt.resolvedUrl('../src/'));
 
-            importModule('gemini', function() {
-                console.log('module imported');
-                python.call('gemini.main', ['gemini://gemini.circumlunar.space/servers/'], function(returnValue) {
-                    console.assert(returnValue.status === 'success', returnValue.message);
+        importModule('gemini', function() {
+          console.log('module imported');
 
-                    content.text = returnValue.content;
-                })
-                python.call('gemini.where_am_I', ['forward'], function(returnValue) {})
-                python.call('gemini.history', ['gemini://gemini.circumlunar.space/servers/'], function(returnValue) {})
-            });
-        }
+          python.call('gemini.main', ['gemini://gemini.circumlunar.space/servers/'], function(returnValue) {
+            console.assert(returnValue.status === 'success', returnValue.message);
 
-        onError: {
-            console.log('python error: ' + traceback);
-        }
+            content.text = returnValue.content;
+          })
+
+          python.call('gemini.where_am_I', ['forward'], function(returnValue) {})
+          python.call('gemini.history', ['gemini://gemini.circumlunar.space/servers/'], function(returnValue) {});
+        });
+      }
+
+      onError: {
+        console.log('python error: ' + traceback);
+      }
     }
+  }
 }
