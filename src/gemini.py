@@ -13,48 +13,54 @@ import tempfile
 import textwrap
 import urllib.parse
 import pyotherside
+import pickle
 
 storage_dir = "/home/phablet/.local/share/gem.aaron"
 
 class Gemini:
     def __init__(self):
         self.makeDirs()
-        # load position
-        position_data = self.read_file("where_am_I.txt")
-        self.position = int(position_data if position_data != None else '0')
         # Load history
-        history_data = self.read_file("history.txt")
+        history_data = self.read_file("history.dat")
         self.history = history_data if history_data != None else []
         # Load future
-        future_data = self.read_file("future.txt")
+        future_data = self.read_file("future.dat")
         self.future = future_data if future_data != None else []
 
     def read_file(self, filename):
-        f = self.open_file(filename, "rb")
+        filepath = "{}/{}".format(storage_dir, filename)
 
-        if f == None:
-            return None
+        if os.path.exists(filepath):
+            file = self.open_file(filepath, "rb")
+            return pickle.load(file)
 
-        f_data = f.read()
-        f.close()
 
-        return f_data
+        return None
 
     def save_data(self):
-        future_file = self.open_file("future.txt", "wb")
-        history_file = self.open_file("history.txt", "wb")
+        print("Persisting")
+        future_file = self.open_file("future.dat", "wb")
+        pickle.dump(self.future, future_file)
 
-        future_file.write(self.future)
-        history_file.write(self.history)
-
-        future_file.close()
-        history_file.close()
+        history_file = self.open_file("history.dat", "wb")
+        pickle.dump(self.history, history_file)
 
     def makeDirs(self):
         try:
             os.mkdir(storage_dir)
+            open("{}/history.dat".format(storage_dir), "wb").close()
+            open("{}/future.dat".format(storage_dir), "wb").close()
         except:
             pass
+
+    def open_file(self, filename, mode="r+"):
+        try:
+            f = open(filename, mode)
+        except:
+            file_path = "{}/{}".format(storage_dir, filename)
+            f = open(file_path, mode)
+
+        return f
 
     def absolutise_url(self, base, relative):
         # Absolutise relative links
@@ -107,8 +113,6 @@ class Gemini:
                 links.append(link_url)
         return links
 
-
-
     def instert_html_links(self, body, links):
         mdBody = ""
         for line in body.splitlines():
@@ -146,15 +150,6 @@ class Gemini:
                 mdBody += "<br>"
                 mdBody += "<br>"
         return mdBody
-
-    def open_file(self, filename, mode="r+"):
-        try:
-            f = open(filename, mode) if os.path.exists(filename) else None
-        except:
-            file_path = "{}/{}".format(storage_dir, filename)
-            f = open(file_path, mode) if os.path.exists(file_path) else None
-
-        return f
 
     def top(self, stack):
         stack_size = len(stack)
@@ -196,6 +191,13 @@ class Gemini:
         pyotherside.send('hideForward')
 
         return self.load(url)
+
+    def load_initial_page(self):
+        if len(self.history) > 0:
+            url = self.top(self.history)
+            self.load(url)
+        else:
+            self.load("gemini://gemini.circumlunar.space/servers/")
 
     def load(self, url):
         pyotherside.send('loading', url)

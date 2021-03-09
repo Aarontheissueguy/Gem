@@ -42,7 +42,7 @@ MainView {
             visible: false
 
             onTriggered: {
-              python.call('gemini.forward', [])
+              python.call('gemini.forward')
             }
 
             Component.onCompleted: {
@@ -60,7 +60,7 @@ MainView {
             iconName: "go-previous"
 
             onTriggered: {
-              python.call('gemini.back', [])
+              python.call('gemini.back')
             }
           }
         ]
@@ -149,8 +149,7 @@ MainView {
              Qt.openUrlExternally(url);
           })
 
-          // Load the homepage
-          python.call('gemini.goto', ['gemini://gemini.circumlunar.space/servers/'])
+          python.call('gemini.load_initial_page')
         });
       }
 
