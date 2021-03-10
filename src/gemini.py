@@ -20,6 +20,7 @@ storage_dir = "/home/phablet/.local/share/gem.aaron"
 class Gemini:
     def __init__(self):
         self.makeDirs()
+        self.page_cache = {}
         # Load history
         history_data = self.read_file("history.dat")
         self.history = history_data if history_data != None else []
@@ -161,7 +162,7 @@ class Gemini:
 
     def back(self):
         if len(self.history) == 1:
-            return self.load(self.history[0])
+            return self.load(self.history[0], True)
 
         self.future.append(self.history.pop())
         url = self.top(self.history)
@@ -169,7 +170,7 @@ class Gemini:
         if len(self.future) > 0:
             pyotherside.send('showForward')
 
-        return self.load(url)
+        return self.load(url, True)
 
     def forward(self):
         self.history.append(self.future.pop())
@@ -178,7 +179,7 @@ class Gemini:
         if len(self.future) == 0:
             pyotherside.send('hideForward')
 
-        return self.load(url)
+        return self.load(url, True)
 
     def goto(self, url):
         if url.split(':')[0] in ["https", "http:"]:
@@ -187,6 +188,7 @@ class Gemini:
         self.history.append(url)
 
         # Reset the future.
+        self.clean_cache(self.future)
         self.future = []
         pyotherside.send('hideForward')
 
@@ -199,11 +201,26 @@ class Gemini:
         else:
             self.load("gemini://gemini.circumlunar.space/servers/")
 
-    def load(self, url):
+    def cache_page(self, url, content):
+        self.page_cache[url] = content
+
+    def clean_cache(self, url_list):
+        assert type(url_list) is list
+        # Removes cached values for the provided list of urls
+        for url in url_list:
+            if url in self.page_cache:
+                del self.page_cache[url]
+
+    def load(self, url, using_cache = False):
         pyotherside.send('loading', url)
+
+        if using_cache and url in self.page_cache:
+            return pyotherside.send('onLoad', self.page_cache[url])
+
         try:
             gemsite = self.get_site(url)
             gemsite = self.instert_html_links(gemsite, self.get_links(gemsite, url))
+            self.cache_page(url, gemsite)
 
             pyotherside.send('onLoad', gemsite)
         except Exception as e:
