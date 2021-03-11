@@ -14,7 +14,21 @@ menu = False
 tls = False
 
 def get_content(url):
-    response = pituophis.get(url, port=port, path=path, query=query, tls=tls)
+    print(url)
+
+    #Workaround start#
+    urllist = url.split("/")
+    result = ["/"] * (len(urllist) * 2 - 1)
+    result[0::2] = urllist
+    urllist = result
+    print(urllist)
+    urllist.insert(5, "/")
+    url = ""
+    for element in urllist:
+        url += element
+    #Workaround stop#
+
+    response = pituophis.get(url, port=port, path=path, query=query, tls=tls) #for some reason this deletes the first letter after the second and only the second "/". I think that is not an issue on our side so I decided to workarround it
     content = ""
     for line in response.text().splitlines():
         if line.startswith("i") or line.startswith("!"):
@@ -24,12 +38,13 @@ def get_content(url):
         elif line.startswith("0") or line.startswith("1"):
             line = line[1:]
             line = line.split("\t")
-            line = '<a style="color: #FFC0CB" href="'+line[-2] +line[-3] +'">'+line[0]+'</a>'
+            line = '<a style="color: #FFC0CB" href="gopher://'+line[-2]+line[-3] +'">'+line[0]+'</a>'
+            print(line +"\n")
             content += line + "<br>"
         else:
             content += line + "<br>"
     return content
-print(get_content("gopher.floodgap.com"))
+
 
 '''
 0 Text Datei
