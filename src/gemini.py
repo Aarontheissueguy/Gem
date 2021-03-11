@@ -14,7 +14,7 @@ import textwrap
 import urllib.parse
 import pyotherside
 import pickle
-
+import gopher
 storage_dir = "/home/phablet/.local/share/gem.aaron"
 
 class Gemini:
@@ -165,7 +165,7 @@ class Gemini:
 
         self.future.append(self.history.pop())
         url = self.top(self.history)
-        
+
         if len(self.future) > 0:
             pyotherside.send('showForward')
 
@@ -181,8 +181,19 @@ class Gemini:
         return self.load(url)
 
     def goto(self, url):
+        if "gopher" in url: #This is wip !!!
+            gophsite = gopher.get_content(url)
+            self.history.append(url)
+
+            # Reset the future.
+            self.future = []
+            pyotherside.send('onLoad', gophsite)
+            return gophsite
+
         if url.split(':')[0] in ["https", "http:"]:
             return pyotherside.send('externalUrl', url)
+
+
 
         self.history.append(url)
 
