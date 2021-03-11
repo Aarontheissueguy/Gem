@@ -43,6 +43,7 @@ install(FILES ${PROJECT_NAME}.apparmor DESTINATION ${DATA_DIR})
 install(DIRECTORY assets DESTINATION ${DATA_DIR})
 install(DIRECTORY src DESTINATION ${DATA_DIR})
 install(DIRECTORY qml DESTINATION ${DATA_DIR})
+install(DIRECTORY deps DESTINATION ${DATA_DIR})
 
 
 # Translations
@@ -74,6 +75,7 @@ file(GLOB_RECURSE PROJECT_SRC_FILES
     qml/*.qml
     qml/*.js
     src/*
+    deps/*
     *.json
     *.json.in
     *.apparmor
