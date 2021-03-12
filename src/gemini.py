@@ -207,7 +207,7 @@ class Gemini:
 
             pyotherside.send('onLoad', gemsite)
         except Exception as e:
-            print("Error:", e.message)
+            print("Error:", e)
             pyotherside.send('onLoad', "uhm... seems like this site does not exist, it might also be bug <br> ¯\_( ͡❛ ͜ʖ ͡❛)_/¯")
 
         return;
