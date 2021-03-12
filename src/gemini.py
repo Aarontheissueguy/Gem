@@ -180,7 +180,12 @@ class Gemini:
 
         return self.load(url)
 
-    def goto(self, url):
+    def goto(self, _url):
+        if "://" not in _url:
+            url = "gemini://" + _url
+        else:
+            url = _url
+
         if url.split(':')[0] in ["https", "http:"]:
             return pyotherside.send('externalUrl', url)
 
