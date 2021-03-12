@@ -181,14 +181,7 @@ class Gemini:
         return self.load(url)
 
     def goto(self, url):
-        if "gopher" in url: #This is wip !!!
-            gophsite = gopher.get_content(url)
-            self.history.append(url)
 
-            # Reset the future.
-            self.future = []
-            pyotherside.send('onLoad', gophsite)
-            return gophsite
 
         if url.split(':')[0] in ["https", "http:"]:
             return pyotherside.send('externalUrl', url)
@@ -212,7 +205,18 @@ class Gemini:
 
     def load(self, url):
         pyotherside.send('loading', url)
+
+        if "gopher://" in url or "Gopher://" in url: 
+            try:
+                gophsite = gopher.get_content(url)
+                pyotherside.send('onLoad', gophsite)
+            except Exception as e:
+                print("Error:", e)
+                pyotherside.send('onLoad', "uhm... seems like this site does not exist, it might also be bug <br> ¯\_( ͡❛ ͜ʖ ͡❛)_/¯")
+            return;
+
         try:
+
             gemsite = self.get_site(url)
             gemsite = self.instert_html_links(gemsite, self.get_links(gemsite, url))
 

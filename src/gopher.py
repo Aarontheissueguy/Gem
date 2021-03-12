@@ -40,7 +40,7 @@ def get_content(url):
         elif line.startswith("0") or line.startswith("1"):
             line = line[1:]
             line = line.split("\t")
-            line = '<a style="color: #FFC0CB" href="gopher://'+line[-2]+line[-3] +'">'+line[0]+'</a>'
+            line = '<br><a style="color: #FFC0CB" href="gopher://'+line[-2]+line[-3] +'">'+line[0]+'</a><br>'
             content += line + "<br>"
         else:
             content += line + "<br>"
