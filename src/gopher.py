@@ -14,21 +14,23 @@ menu = False
 tls = False
 
 def get_content(url):
-    print(url)
 
     #Workaround start#
     urllist = url.split("/")
     result = ["/"] * (len(urllist) * 2 - 1)
     result[0::2] = urllist
     urllist = result
-    print(urllist)
     urllist.insert(5, "/")
     url = ""
     for element in urllist:
         url += element
     #Workaround stop#
-
-    response = pituophis.get(url, port=port, path=path, query=query, tls=tls) #for some reason this deletes the first letter after the second and only the second "/". I think that is not an issue on our side so I decided to workarround it
+    '''
+    for some reason the line below deletes the first letter after
+    the second and only the second "/" even if I pass in everything directly.
+    I think that is not an issue on our side so I decided to workarround it
+    '''
+    response = pituophis.get(url, port=port, path=path, query=query, tls=tls)
     content = ""
     for line in response.text().splitlines():
         if line.startswith("i") or line.startswith("!"):
@@ -39,7 +41,6 @@ def get_content(url):
             line = line[1:]
             line = line.split("\t")
             line = '<a style="color: #FFC0CB" href="gopher://'+line[-2]+line[-3] +'">'+line[0]+'</a>'
-            print(line +"\n")
             content += line + "<br>"
         else:
             content += line + "<br>"
