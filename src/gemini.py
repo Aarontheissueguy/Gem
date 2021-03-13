@@ -170,7 +170,7 @@ class Gemini:
 
         self.future.append(self.history.pop())
         url = self.top(self.history)
-        
+
         if len(self.future) > 0:
             pyotherside.send('showForward')
 
@@ -193,6 +193,8 @@ class Gemini:
 
         if url.split(':')[0] in ["https", "http:"]:
             return pyotherside.send('externalUrl', url)
+
+
 
         self.history.append(url)
 
@@ -240,7 +242,9 @@ class Gemini:
         if using_cache and url in self.page_cache:
             return pyotherside.send('onLoad', self.page_cache[url]['content'])
 
+
         try:
+
             gemsite = self.get_site(url)
             gemsite = self.instert_html_links(gemsite, self.get_links(gemsite, url))
             self.cache_page(url, gemsite)
