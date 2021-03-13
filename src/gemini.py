@@ -18,6 +18,7 @@ import time
 import re
 import gopher
 
+
 storage_dir = "/home/phablet/.local/share/gem.aaron"
 
 class Gemini:
@@ -253,6 +254,7 @@ class Gemini:
                 print("Error:", e)
                 pyotherside.send('onLoad', "uhm... seems like this site does not exist, it might also be bug <br> ¯\_( ͡❛ ͜ʖ ͡❛)_/¯")
             return;
+
 
         try:
 
