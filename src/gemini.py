@@ -16,6 +16,7 @@ import pyotherside
 import pickle
 import time
 import re
+import gopher
 
 storage_dir = "/home/phablet/.local/share/gem.aaron"
 
@@ -242,6 +243,16 @@ class Gemini:
         if using_cache and url in self.page_cache:
             return pyotherside.send('onLoad', self.page_cache[url]['content'])
 
+
+        if "gopher://" in url or "Gopher://" in url:
+            try:
+                gophsite = gopher.get_content(url)
+                self.cache_page(url, gophsite)
+                pyotherside.send('onLoad', gophsite)
+            except Exception as e:
+                print("Error:", e)
+                pyotherside.send('onLoad', "uhm... seems like this site does not exist, it might also be bug <br> ¯\_( ͡❛ ͜ʖ ͡❛)_/¯")
+            return;
 
         try:
 
