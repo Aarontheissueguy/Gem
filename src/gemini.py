@@ -15,6 +15,7 @@ import urllib.parse
 import pyotherside
 import pickle
 import time
+import re
 
 storage_dir = "/home/phablet/.local/share/gem.aaron"
 
@@ -70,9 +71,9 @@ class Gemini:
         # Absolutise relative links
         if "://" not in relative:
             # Python's URL tools somehow only work with known schemes?
-            base = base.replace("gemini://","http://")
+            base = re.sub("gemini://", "http://", base, flags=re.IGNORECASE)
             relative = urllib.parse.urljoin(base, relative)
-            relative = relative.replace("http://", "gemini://")
+            relative = re.sub("http://", "gemini://", relative, flags=re.IGNORECASE)
         return relative
 
     def get_site(self, url):
@@ -184,7 +185,12 @@ class Gemini:
 
         return self.load(url, True)
 
-    def goto(self, url):
+    def goto(self, _url):
+        if "://" not in _url:
+            url = "gemini://" + _url
+        else:
+            url = _url
+
         if url.split(':')[0] in ["https", "http:"]:
             return pyotherside.send('externalUrl', url)
 
