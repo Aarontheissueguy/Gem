@@ -66,6 +66,19 @@ MainView {
         ]
       }
 
+      trailingActionBar {
+        numberOfSlots: 1
+        actions: [
+          Action {
+            id: reload
+            iconName: "reload"
+
+            onTriggered: {
+              python.call('gemini.load', [adress.text])
+            }
+          }
+        ]
+      }
       contents: Rectangle {
         id: addressWrapper
         radius: 15
