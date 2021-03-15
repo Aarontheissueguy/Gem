@@ -67,11 +67,19 @@ MainView {
       }
 
       trailingActionBar {
-        numberOfSlots: 1
+        numberOfSlots: 2
         actions: [
           Action {
             id: reload
             iconName: "reload"
+
+            onTriggered: {
+              python.call('gemini.load', [adress.text])
+            }
+          },
+          Action {
+            id: bookmark
+            iconName: "non-starred"
 
             onTriggered: {
               python.call('gemini.load', [adress.text])
@@ -136,6 +144,74 @@ MainView {
 
         onLinkActivated: {
           python.call('gemini.goto', [link])
+        }
+      }
+    }
+
+
+    BottomEdge {
+      clip: True
+      id: bottomEdge
+      height: parent.height
+      hint {
+        text: "Bookmarks"
+      }
+      contentComponent: Rectangle {
+        clip: True
+        width: bottomEdge.width
+        height: bottomEdge.height
+        color: "#515151"
+        Rectangle {
+          z:1
+          color: "black"
+          height: bmToolbar.height
+          width: parent.width
+          Toolbar {
+            id: bmToolbar
+            anchors.left: parent.left
+            anchors.top: parent.top
+            anchors.topMargin: parent.height / 2 - bmToolbar.height / 2
+            anchors.leftMargin: 15
+            leadingActionBar.actions: [
+              Action {
+                  iconName: "down"
+                  text: "Collapse"
+                  onTriggered: bottomEdge.collapse()
+              }
+            ]
+          }
+        }
+        Flickable {
+          width: parent.width
+          height: parent.height - bmToolbar.height * 2
+          anchors.top: bmToolbar.bottom
+          contentHeight: bmClm.implicitHeight
+          Column {
+            id: bmClm
+            anchors.fill: parent
+            anchors.topMargin: 100
+            Repeater {
+              id: bmRptr
+              model: ["<a href= 'https://www.google.com'>Link<a>", "https://www.google.com", "Bookmark3", "Bookmark2", "Bookmark3", "Bookmark2", "Bookmark3"]
+              ListItem {
+                color: "#515151"
+                highlightColor: "white"
+                Text {
+                  id: bmText
+                  anchors.centerIn: parent
+                  color: "#FFFFFFFF"
+                  textFormat : Text.RichText
+                  font.pointSize: 35
+                  wrapMode: Text.WordWrap
+                  text: modelData
+                  onLinkActivated: {
+                    bottomEdge.collapse()
+                  }
+                }
+                onClicked: python.call('gemini.goto', [modelData])
+              }
+            }
+          }
         }
       }
     }
