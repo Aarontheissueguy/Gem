@@ -36,10 +36,12 @@ class Gemini:
 
     def read_file(self, filename):
         filepath = "{}/{}".format(storage_dir, filename)
-
-        if os.path.exists(filepath):
-            file = self.open_file(filepath, "rb")
-            return pickle.load(file)
+        try:
+            if os.path.exists(filepath):
+                file = self.open_file(filepath, "rb")
+                return pickle.load(file)
+        except:
+            return []
 
 
         return None

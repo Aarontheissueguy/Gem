@@ -6,13 +6,13 @@ import ssl
 import tempfile
 import textwrap
 import urllib.parse
-#import pyotherside
+import pyotherside
 import pickle
 import time
 import re
 import gopher
 
-storage_dir = "/home/aaron/Nextcloud/Projekte/GitHub/Gem/src/"
+storage_dir = "/home/phablet/.local/share/gem.aaron"
 
 class Bookmark:
     def __init__(self):
@@ -45,7 +45,7 @@ class Bookmark:
         try:
             f = open(filename, mode)
         except:
-            file_path = filename.format(storage_dir, filename)
+            file_path = "{}/{}".format(storage_dir, filename)
             f = open(file_path, mode)
 
         return f
@@ -57,12 +57,13 @@ class Bookmark:
         else:
             print(newBookmark)
             self.bookmarks.append(newBookmark)
-
+        self.save_data()
     def remove(self, url):
         try:
             del self.bookmarks[url]
         except: #should never happen in reality
             pass
+        self.save_data()
 
     def returnvalues(self, url, name): #returns a list of all names/urls
         list = []
@@ -95,9 +96,3 @@ class Bookmark:
 
 
 bookmark = Bookmark()
-bookmark.add("https://wiki.com", "bookmark3")
-bookmark.add("https://amazon.com", "bookmark2")
-print(bookmark.returnvalues(True, False))
-print(bookmark.returnvalues(False, True))
-print(bookmark.allocate("https://amazon.com"))
-bookmark.save_data()

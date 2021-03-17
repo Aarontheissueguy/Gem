@@ -20,6 +20,7 @@ import Ubuntu.Components 1.3
 import QtQuick.Layouts 1.3
 import Qt.labs.settings 1.0
 import io.thp.pyotherside 1.3
+import Ubuntu.Components.Popups 1.3
 
 MainView {
   applicationName: "gem.aaron"
@@ -80,10 +81,7 @@ MainView {
           Action {
             id: bookmark
             iconName: "non-starred"
-
-            onTriggered: {
-              python.call('gemini.load', [adress.text])
-            }
+            onTriggered: PopupUtils.open(dialog)
           }
         ]
       }
@@ -122,7 +120,43 @@ MainView {
         }
       }
     }
+    Component {
+      id: dialog
+      Dialog {
+        id: dialogue
+        title: "Save Bookmark"
+        TextField {
+          id: bmurl
+          text: adress.text
+          placeholderText: "url"
+          hasClearButton: true
+        }
+        TextField {
+          id: bmname
+          text: ""
+          placeholderText: "Name"
+          hasClearButton: true
+        }
+        Button {
+          text: "cancel"
+          onClicked: PopupUtils.close(dialogue)
+        }
+        Button {
+          text: "save"
+          color: UbuntuColors.orange
+          onClicked: {
+            forceActiveFocus()
+            python.call('bookmark.add', [bmurl.text, bmname.text])
+            python.call('bookmark.returnvalues', [false,true], function(names) {
+              console.log(names)
+              bottomEdge.repeaterModel = names
 
+            })
+            PopupUtils.close(dialogue)
+          }
+        }
+      }
+    }
     Flickable {
       id: flick
       anchors.fill: parent
@@ -150,14 +184,15 @@ MainView {
 
 
     BottomEdge {
-      clip: True
       id: bottomEdge
+      property var repeaterModel: [] //I need to propagate using this property because I cant acces loaded Components directly
+      clip: true
       height: parent.height
       hint {
         text: "Bookmarks"
       }
       contentComponent: Rectangle {
-        clip: True
+        clip: true
         width: bottomEdge.width
         height: bottomEdge.height
         color: "#515151"
@@ -182,6 +217,7 @@ MainView {
           }
         }
         Flickable {
+          id: bmFlick
           width: parent.width
           height: parent.height - bmToolbar.height * 2
           anchors.top: bmToolbar.bottom
@@ -191,8 +227,8 @@ MainView {
             anchors.fill: parent
             anchors.topMargin: 100
             Repeater {
-              id: bmRptr
-              model: ["<a href= 'https://www.google.com'>Link<a>", "https://www.google.com", "Bookmark3", "Bookmark2", "Bookmark3", "Bookmark2", "Bookmark3"]
+              id: repeater
+              model: bottomEdge.repeaterModel
               ListItem {
                 color: "#515151"
                 highlightColor: "white"
@@ -200,15 +236,19 @@ MainView {
                   id: bmText
                   anchors.centerIn: parent
                   color: "#FFFFFFFF"
-                  textFormat : Text.RichText
                   font.pointSize: 35
                   wrapMode: Text.WordWrap
                   text: modelData
-                  onLinkActivated: {
-                    bottomEdge.collapse()
-                  }
                 }
-                onClicked: python.call('gemini.goto', [modelData])
+                onClicked: {
+                  python.call('bookmark.allocate', [modelData], function(url) {
+                    console.log(url)
+                    python.call('gemini.goto', [url])
+                  })
+                  bottomEdge.collapse()
+
+
+                }
               }
             }
           }
@@ -223,7 +263,7 @@ MainView {
         addImportPath(Qt.resolvedUrl('../src/'));
 
         importNames('gemini', ['gemini'], function() {
-          console.log('module imported');
+          console.log('module gemini imported');
 
           python.setHandler('loading', function(url) {
             content.text = "<center>Loading.. Stay calm!</center> <br> <center>(っ⌒‿⌒)っ</center>"
@@ -239,6 +279,14 @@ MainView {
           })
 
           python.call('gemini.load_initial_page')
+        });
+        importNames('bookmarks', ['bookmark'], function() {
+          console.log('module bookmark imported');
+
+          python.call('bookmark.returnvalues', [false,true], function(names) {
+            console.log(names)
+            bottomEdge.repeaterModel = names
+          })
         });
       }
 
