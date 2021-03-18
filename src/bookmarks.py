@@ -58,11 +58,8 @@ class Bookmark:
             print(newBookmark)
             self.bookmarks.append(newBookmark)
         self.save_data()
-    def remove(self, url):
-        try:
-            del self.bookmarks[url]
-        except: #should never happen in reality
-            pass
+    def remove(self, url, name):
+        self.bookmarks.remove(url+","+name)
         self.save_data()
 
     def returnvalues(self, url, name): #returns a list of all names/urls

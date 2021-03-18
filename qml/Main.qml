@@ -249,6 +249,26 @@ MainView {
 
 
                 }
+                leadingActions: ListItemActions {
+                  actions: [
+                    Action {
+                      iconName: "delete"
+                      onTriggered: {
+                        python.call('bookmark.allocate', [modelData], function(url) {
+                          console.log("allocate")
+                          console.log(url)
+                          console.log(modelData)
+                          console.log("allocatestop")
+                          python.call('bookmark.remove', [url,modelData])
+                          python.call('bookmark.returnvalues', [false,true], function(names) {
+                            console.log(names)
+                            bottomEdge.repeaterModel = names
+                          })
+                        })
+                      }
+                    }
+                  ]
+                }
               }
             }
           }
