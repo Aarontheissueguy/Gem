@@ -182,6 +182,32 @@ MainView {
       }
     }
 
+    Component {
+      id: inputComponent
+      Dialog {
+        id: inputDialog
+        title: "Enter input"
+        TextField {
+          id: inputfield
+          placeholderText: "input"
+          hasClearButton: true
+        }
+        Button {
+          text: "cancel"
+          onClicked: PopupUtils.close(inputDialog)
+        }
+        Button {
+          text: "send"
+          color: UbuntuColors.orange
+          onClicked: {
+            forceActiveFocus()
+            python.call('gemini.handle_input', [inputfield.text])
+            PopupUtils.close(inputDialog)
+          }
+        }
+      }
+    }
+
 
     BottomEdge {
       id: bottomEdge
@@ -296,6 +322,10 @@ MainView {
 
           python.setHandler('externalUrl', function(url) {
              Qt.openUrlExternally(url);
+          })
+
+          python.setHandler('requestInput', function() {
+            PopupUtils.open(inputComponent)
           })
 
           python.call('gemini.load_initial_page')
