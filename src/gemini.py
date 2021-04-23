@@ -27,8 +27,26 @@ class Gemini:
         # Load future
         future_data = self.read_file("future.dat")
         self.future = future_data if future_data != None else []
+
+        self.migrate_to_page_context()
+
         # cache_limit prevents all pages from being cached
         self.cache_limit = 5
+
+    def migrate_to_page_context(self):
+        # Migrate from simple url strings in the history to dictionaries
+        # The dictionaries currently contain the url and scroll height of the page.
+        # In the future they can also hold other information for page context.
+
+        self.history = [
+            self.create_page_context(item, 0) if type(item) is str else item
+            for item in self.history
+        ]
+
+        self.future = [
+            self.create_page_context(item, 0) if type(item) is str else item
+            for item in self.future
+        ]
 
     def read_file(self, filename):
         filepath = "{}/{}".format(storage_dir, filename)
