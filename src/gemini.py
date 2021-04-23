@@ -5,19 +5,15 @@ I wouldnt have been able to do this without this resource. Thanks for the awsome
 
 
 import cgi
-import mailcap
 import os
 import socket
 import ssl
-import tempfile
-import textwrap
 import urllib.parse
 import pyotherside
 import pickle
 import time
 import re
 import gopher
-
 
 storage_dir = "/home/phablet/.local/share/gem.aaron"
 
