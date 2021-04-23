@@ -270,6 +270,10 @@ class Gemini:
         try:
 
             gemsite = self.get_site(url)
+
+            if gemsite is None:
+                return
+
             gemsite = self.instert_html_links(gemsite, self.get_links(gemsite, url))
             self.cache_page(url, gemsite)
 
