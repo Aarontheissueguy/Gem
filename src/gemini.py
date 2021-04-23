@@ -33,6 +33,7 @@ class Gemini:
         self.future = future_data if future_data != None else []
         # cache_limit prevents all pages from being cached
         self.cache_limit = 5
+        self.current_url = None
 
     def read_file(self, filename):
         filepath = "{}/{}".format(storage_dir, filename)
@@ -98,8 +99,9 @@ class Gemini:
             # Handle input requests
             if status.startswith("1"):
                 # Prompt
-                query = input("INPUT" + mime + "> ")
-                url += "?" + urllib.parse.quote(query) # Bit lazy...
+                pyotherside.send('requestInput')
+                self.current_url = url
+                break
                 # Follow redirects
             elif status.startswith("3"):
                 url = self.absolutise_url(url, mime)
@@ -111,6 +113,13 @@ class Gemini:
                 body = body.decode(mime_opts.get("charset","UTF-8"))
                 return str(body)
                 break
+
+    def handle_input(self, inputText):
+        new_url = self.current_url
+        new_url += "?" + urllib.parse.quote(inputText)
+
+        self.current_url = None
+        self.goto(new_url)
 
     def get_links(self, body, url):
         links = []
