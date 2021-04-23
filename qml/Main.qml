@@ -184,12 +184,12 @@ MainView {
 
     Component {
       id: inputComponent
+
       Dialog {
         id: inputDialog
-        title: "Enter input"
+        title: "Input requested"
         TextField {
           id: inputfield
-          placeholderText: "input"
           hasClearButton: true
         }
         Button {
@@ -324,8 +324,8 @@ MainView {
              Qt.openUrlExternally(url);
           })
 
-          python.setHandler('requestInput', function() {
-            PopupUtils.open(inputComponent)
+          python.setHandler('requestInput', function(message) {
+            PopupUtils.open(inputComponent, null, { 'text': message })
           })
 
           python.call('gemini.load_initial_page')

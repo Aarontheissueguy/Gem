@@ -95,24 +95,23 @@ class Gemini:
             fp = s.makefile("rb")
             header = fp.readline()
             header = header.decode("UTF-8").strip()
-            status, mime = header.split()[:2]
+            status, meta = header.split()[:2]
             # Handle input requests
             if status.startswith("1"):
-                # Prompt
-                pyotherside.send('requestInput')
+                # Prompt with message from server (in meta)
+                pyotherside.send('requestInput', meta)
                 self.current_url = url
                 break
                 # Follow redirects
             elif status.startswith("3"):
-                url = self.absolutise_url(url, mime)
+                url = self.absolutise_url(url, meta)
                 parsed_url = urllib.parse.urlparse(url)
             # Otherwise, we're done.
             else:
-                mime, mime_opts = cgi.parse_header(mime)
+                mime, mime_opts = cgi.parse_header(meta)
                 body = fp.read()
                 body = body.decode(mime_opts.get("charset","UTF-8"))
                 return str(body)
-                break
 
     def handle_input(self, inputText):
         new_url = self.current_url
