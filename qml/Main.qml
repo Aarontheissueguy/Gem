@@ -190,10 +190,19 @@ MainView {
         title: "Input requested"
 
         property bool isSecret: false
+
+        function submit() {
+          forceActiveFocus()
+          python.call('gemini.handle_input', [inputfield.text])
+          PopupUtils.close(inputDialog)
+        }
+
         TextField {
           id: inputfield
           hasClearButton: true
           echoMode: isSecret ? TextInput.Password : TextInput.Normal
+
+          onAccepted: submit()
         }
         Button {
           text: "cancel"
@@ -202,11 +211,7 @@ MainView {
         Button {
           text: "send"
           color: UbuntuColors.orange
-          onClicked: {
-            forceActiveFocus()
-            python.call('gemini.handle_input', [inputfield.text])
-            PopupUtils.close(inputDialog)
-          }
+          onClicked: submit()
         }
       }
     }
