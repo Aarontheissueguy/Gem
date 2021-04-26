@@ -99,7 +99,10 @@ class Gemini:
             # Handle input requests
             if status.startswith("1"):
                 # Prompt with message from server (in meta)
-                pyotherside.send('requestInput', meta)
+                is_secret = status == "11"
+
+                pyotherside.send('requestInput', meta, is_secret)
+
                 self.current_url = url
                 break
                 # Follow redirects

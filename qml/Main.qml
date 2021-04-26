@@ -188,9 +188,12 @@ MainView {
       Dialog {
         id: inputDialog
         title: "Input requested"
+
+        property bool isSecret: false
         TextField {
           id: inputfield
           hasClearButton: true
+          echoMode: isSecret ? TextInput.Password : TextInput.Normal
         }
         Button {
           text: "cancel"
@@ -324,8 +327,8 @@ MainView {
              Qt.openUrlExternally(url);
           })
 
-          python.setHandler('requestInput', function(message) {
-            PopupUtils.open(inputComponent, null, { 'text': message })
+          python.setHandler('requestInput', function(message, isSecret) {
+            PopupUtils.open(inputComponent, null, { 'text': message, 'isSecret': isSecret })
           })
 
           python.call('gemini.load_initial_page')
