@@ -33,6 +33,7 @@ class Gemini:
         self.future = future_data if future_data != None else []
         # cache_limit prevents all pages from being cached
         self.cache_limit = 5
+        self.current_url = None
 
     def read_file(self, filename):
         filepath = "{}/{}".format(storage_dir, filename)
@@ -94,23 +95,33 @@ class Gemini:
             fp = s.makefile("rb")
             header = fp.readline()
             header = header.decode("UTF-8").strip()
-            status, mime = header.split()[:2]
+            status, meta = header.split()[:2]
             # Handle input requests
             if status.startswith("1"):
-                # Prompt
-                query = input("INPUT" + mime + "> ")
-                url += "?" + urllib.parse.quote(query) # Bit lazy...
+                # Prompt with message from server (in meta)
+                is_secret = status == "11"
+
+                pyotherside.send('requestInput', meta, is_secret)
+
+                self.current_url = url
+                break
                 # Follow redirects
             elif status.startswith("3"):
-                url = self.absolutise_url(url, mime)
+                url = self.absolutise_url(url, meta)
                 parsed_url = urllib.parse.urlparse(url)
             # Otherwise, we're done.
             else:
-                mime, mime_opts = cgi.parse_header(mime)
+                mime, mime_opts = cgi.parse_header(meta)
                 body = fp.read()
                 body = body.decode(mime_opts.get("charset","UTF-8"))
                 return str(body)
-                break
+
+    def handle_input(self, inputText):
+        new_url = self.current_url
+        new_url += "?" + urllib.parse.quote(inputText)
+
+        self.current_url = None
+        self.goto(new_url)
 
     def get_links(self, body, url):
         links = []
@@ -261,6 +272,10 @@ class Gemini:
         try:
 
             gemsite = self.get_site(url)
+
+            if gemsite is None:
+                return
+
             gemsite = self.instert_html_links(gemsite, self.get_links(gemsite, url))
             self.cache_page(url, gemsite)
 

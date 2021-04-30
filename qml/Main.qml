@@ -182,6 +182,40 @@ MainView {
       }
     }
 
+    Component {
+      id: inputComponent
+
+      Dialog {
+        id: inputDialog
+        title: "Input requested"
+
+        property bool isSecret: false
+
+        function submit() {
+          forceActiveFocus()
+          python.call('gemini.handle_input', [inputfield.text])
+          PopupUtils.close(inputDialog)
+        }
+
+        TextField {
+          id: inputfield
+          hasClearButton: true
+          echoMode: isSecret ? TextInput.Password : TextInput.Normal
+
+          onAccepted: submit()
+        }
+        Button {
+          text: "cancel"
+          onClicked: PopupUtils.close(inputDialog)
+        }
+        Button {
+          text: "send"
+          color: UbuntuColors.orange
+          onClicked: submit()
+        }
+      }
+    }
+
 
     BottomEdge {
       id: bottomEdge
@@ -296,6 +330,10 @@ MainView {
 
           python.setHandler('externalUrl', function(url) {
              Qt.openUrlExternally(url);
+          })
+
+          python.setHandler('requestInput', function(message, isSecret) {
+            PopupUtils.open(inputComponent, null, { 'text': message, 'isSecret': isSecret })
           })
 
           python.call('gemini.load_initial_page')
