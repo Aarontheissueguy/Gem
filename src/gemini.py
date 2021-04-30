@@ -5,19 +5,15 @@ I wouldnt have been able to do this without this resource. Thanks for the awsome
 
 
 import cgi
-import mailcap
 import os
 import socket
 import ssl
-import tempfile
-import textwrap
 import urllib.parse
 import pyotherside
 import pickle
 import time
 import re
 import gopher
-
 
 storage_dir = "/home/phablet/.local/share/gem.aaron"
 
@@ -31,9 +27,27 @@ class Gemini:
         # Load future
         future_data = self.read_file("future.dat")
         self.future = future_data if future_data != None else []
+
+        self.migrate_to_page_context()
+
         # cache_limit prevents all pages from being cached
         self.cache_limit = 5
         self.current_url = None
+
+    def migrate_to_page_context(self):
+        # Migrate from simple url strings in the history to dictionaries
+        # The dictionaries currently contain the url and scroll height of the page.
+        # In the future they can also hold other information for page context.
+
+        self.history = [
+            self.create_page_context(item, 0) if type(item) is str else item
+            for item in self.history
+        ]
+
+        self.future = [
+            self.create_page_context(item, 0) if type(item) is str else item
+            for item in self.future
+        ]
 
     def read_file(self, filename):
         filepath = "{}/{}".format(storage_dir, filename)
@@ -179,28 +193,45 @@ class Gemini:
 
         return stack[stack_size - 1]
 
-    def back(self):
+    def create_page_context(self, url, scroll_height):
+        return {
+            "url": url,
+            "scroll_height": scroll_height
+        }
+
+    def update_scroll_height(self, scroll_height):
+        # Record scroll height for current page (top page on the stack)
+        current_page = self.top(self.history)
+        current_page["scroll_height"] = scroll_height
+        self.history.pop()
+        self.history.append(current_page)
+
+    def back(self, scroll_height):
         if len(self.history) == 1:
             return self.load(self.history[0], True)
 
+        self.update_scroll_height(scroll_height)
+
         self.future.append(self.history.pop())
-        url = self.top(self.history)
+        page = self.top(self.history)
 
         if len(self.future) > 0:
             pyotherside.send('showForward')
 
-        return self.load(url, True)
+        return self.load(page, True)
 
-    def forward(self):
+    def forward(self, scroll_height):
+        self.update_scroll_height(scroll_height)
+
         self.history.append(self.future.pop())
-        url = self.top(self.history)
+        page = self.top(self.history)
 
         if len(self.future) == 0:
             pyotherside.send('hideForward')
 
-        return self.load(url, True)
+        return self.load(page, True)
 
-    def goto(self, _url):
+    def goto(self, _url, scroll_height=0):
         if "://" not in _url:
             url = "gemini://" + _url
         else:
@@ -209,29 +240,42 @@ class Gemini:
         if url.split(':')[0] in ["https", "http:"]:
             return pyotherside.send('externalUrl', url)
 
+        self.update_scroll_height(scroll_height)
 
-
-        self.history.append(url)
+        page = self.create_page_context(url, 0)
+        self.history.append(page)
 
         # Reset the future.
         self.remove_from_cache(self.future)
         self.future = []
         pyotherside.send('hideForward')
 
-        return self.load(url)
+        return self.load(page)
+
+    def reload(self, url, scroll_height):
+        page = self.create_page_context(url, scroll_height)
+
+        return self.load(page)
 
     def load_initial_page(self):
         if len(self.history) > 0:
-            url = self.top(self.history)
-            self.load(url)
+            page = self.top(self.history)
+            self.load(page)
         else:
-            self.load("gemini://gemini.circumlunar.space/servers/")
+            home_page = self.create_page_context("gemini://gemini.circumlunar.space/servers/", 0)
+            self.load(home_page)
 
     def cache_page(self, url, content):
-        self.page_cache[url] = {
-            "content": content,
-            "timestamp": time.time()
-        }
+        cache_obj = {}
+
+        if url in self.page_cache:
+            cache_obj = self.page_cache[url]
+
+
+        cache_obj["content"] =  content
+        cache_obj["timestamp"] =  time.time()
+
+        self.page_cache[url] = cache_obj
 
     def prune_cache(self):
         # Find urls that are too old to be cached
@@ -242,27 +286,34 @@ class Gemini:
         if old_urls:
             self.remove_from_cache(old_urls)
 
-    def remove_from_cache(self, url_list):
+    def remove_from_cache(self, context_list):
+        url_list = [page['url'] for page in context_list]
+
         # Removes cached values for the provided list of urls
         for url in url_list:
             if url in self.page_cache:
                 del self.page_cache[url]
 
-    def load(self, url, using_cache = False):
+    def load(self, page_context, using_cache = False):
+        url = page_context["url"]
+        scroll_height = page_context['scroll_height'] if 'scroll_height' in page_context else 0
+
         if len(self.history) > self.cache_limit or len(self.future) > self.cache_limit:
             self.prune_cache()
-        self.prune_cache()
+
         pyotherside.send('loading', url)
 
         if using_cache and url in self.page_cache:
-            return pyotherside.send('onLoad', self.page_cache[url]['content'])
+            cache_obj = self.page_cache[url]
+
+            return pyotherside.send('onLoad', cache_obj['content'], scroll_height)
 
 
         if "gopher://" in url or "Gopher://" in url:
             try:
                 gophsite = gopher.get_content(url)
                 self.cache_page(url, gophsite)
-                pyotherside.send('onLoad', gophsite)
+                pyotherside.send('onLoad', gophsite, scroll_height)
             except Exception as e:
                 print("Error:", e)
                 pyotherside.send('onLoad', "uhm... seems like this site does not exist, it might also be bug <br> ¯\_( ͡❛ ͜ʖ ͡❛)_/¯")
@@ -279,7 +330,7 @@ class Gemini:
             gemsite = self.instert_html_links(gemsite, self.get_links(gemsite, url))
             self.cache_page(url, gemsite)
 
-            pyotherside.send('onLoad', gemsite)
+            pyotherside.send('onLoad', gemsite, scroll_height)
         except Exception as e:
             print("Error:", e)
             pyotherside.send('onLoad', "uhm... seems like this site does not exist, it might also be bug <br> ¯\_( ͡❛ ͜ʖ ͡❛)_/¯")

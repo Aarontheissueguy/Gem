@@ -43,7 +43,7 @@ MainView {
             visible: false
 
             onTriggered: {
-              python.call('gemini.forward')
+              python.call('gemini.forward', [flick.contentY])
             }
 
             Component.onCompleted: {
@@ -61,7 +61,7 @@ MainView {
             iconName: "go-previous"
 
             onTriggered: {
-              python.call('gemini.back')
+              python.call('gemini.back', [flick.contentY])
             }
           }
         ]
@@ -75,7 +75,7 @@ MainView {
             iconName: "reload"
 
             onTriggered: {
-              python.call('gemini.load', [adress.text])
+              python.call('gemini.reload', [adress.text, flick.contentY])
             }
           },
           Action {
@@ -115,7 +115,7 @@ MainView {
           }
 
           onAccepted: {
-            python.call('gemini.goto', [adress.text])
+            python.call('gemini.goto', [adress.text, flick.contentY])
           }
         }
       }
@@ -177,7 +177,7 @@ MainView {
         wrapMode: Text.WordWrap
 
         onLinkActivated: {
-          python.call('gemini.goto', [link])
+          python.call('gemini.goto', [link, flick.contentY])
         }
       }
     }
@@ -277,7 +277,7 @@ MainView {
                 onClicked: {
                   python.call('bookmark.allocate', [modelData], function(url) {
                     console.log(url)
-                    python.call('gemini.goto', [url])
+                    python.call('gemini.goto', [url, flick.contentY])
                   })
                   bottomEdge.collapse()
 
@@ -324,8 +324,12 @@ MainView {
             adress.text = url;
           })
 
-          python.setHandler('onLoad', function(gemsite) {
+          python.setHandler('onLoad', function(gemsite, scrollHeight) {
             content.text = gemsite;
+
+            if (scrollHeight) {
+              flick.contentY = scrollHeight;
+            }
           })
 
           python.setHandler('externalUrl', function(url) {
