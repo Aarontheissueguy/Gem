@@ -99,11 +99,16 @@ class Gemini:
         parsed_url = urllib.parse.urlparse(url)
 
         while True:
-            s = socket.create_connection((parsed_url.netloc, 1965))
+            # Handle port numbers in the url (defaults to 1965)
+            netloc_data = parsed_url.netloc.split(":")
+            netloc = netloc_data[0]
+            port_number = int(netloc_data[1]) if len(netloc_data) > 1 else 1965
+
+            s = socket.create_connection((netloc, port_number))
             context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
             context.check_hostname = False
             context.verify_mode = ssl.CERT_NONE
-            s = context.wrap_socket(s, server_hostname = parsed_url.netloc)
+            s = context.wrap_socket(s, server_hostname = netloc)
             s.sendall((url + '\r\n').encode("UTF-8"))
             # Get header and check for redirects
             fp = s.makefile("rb")
