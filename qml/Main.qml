@@ -124,25 +124,25 @@ MainView {
       id: dialog
       Dialog {
         id: dialogue
-        title: "Save Bookmark"
+        title: i18n.tr("Save Bookmark")
         TextField {
           id: bmurl
           text: adress.text
-          placeholderText: "url"
+          placeholderText: i18n.tr("url")
           hasClearButton: true
         }
         TextField {
           id: bmname
           text: ""
-          placeholderText: "Name"
+          placeholderText: i18n.tr("Name")
           hasClearButton: true
         }
         Button {
-          text: "cancel"
+          text: i18n.tr("cancel")
           onClicked: PopupUtils.close(dialogue)
         }
         Button {
-          text: "save"
+          text: i18n.tr("save")
           color: UbuntuColors.orange
           onClicked: {
             forceActiveFocus()
@@ -187,7 +187,7 @@ MainView {
 
       Dialog {
         id: inputDialog
-        title: "Input requested"
+        title: i18n.tr("Input requested")
 
         property bool isSecret: false
 
@@ -205,11 +205,11 @@ MainView {
           onAccepted: submit()
         }
         Button {
-          text: "cancel"
+          text: i18n.tr("cancel")
           onClicked: PopupUtils.close(inputDialog)
         }
         Button {
-          text: "send"
+          text: i18n.tr("send")
           color: UbuntuColors.orange
           onClicked: submit()
         }
@@ -223,7 +223,7 @@ MainView {
       clip: true
       height: parent.height
       hint {
-        text: "Bookmarks"
+        text: i18n.tr("Bookmarks")
       }
       contentComponent: Rectangle {
         clip: true
@@ -244,7 +244,7 @@ MainView {
             leadingActionBar.actions: [
               Action {
                   iconName: "down"
-                  text: "Collapse"
+                  text: i18n.tr("Collapse")
                   onTriggered: bottomEdge.collapse()
               }
             ]
@@ -320,7 +320,7 @@ MainView {
           console.log('module gemini imported');
 
           python.setHandler('loading', function(url) {
-            content.text = "<center>Loading.. Stay calm!</center> <br> <center>(っ⌒‿⌒)っ</center>"
+            content.text = i18n.tr("loadingMessage")
             adress.text = url;
           })
 
@@ -330,6 +330,10 @@ MainView {
             if (scrollHeight) {
               flick.contentY = scrollHeight;
             }
+          })
+
+          python.setHandler('onLoadError', function() {
+            content.text = i18n.tr("errorMessage")
           })
 
           python.setHandler('externalUrl', function(url) {

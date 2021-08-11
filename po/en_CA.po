@@ -8,14 +8,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gem.aaron\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-03-18 18:21+0000\n"
+"POT-Creation-Date: 2021-08-03 13:31+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"Language: en_CA\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
 #: ../qml/Main.qml:127
 msgid "Save Bookmark"
@@ -55,11 +56,11 @@ msgstr ""
 
 #: ../qml/Main.qml:323
 msgid "loadingMessage"
-msgstr ""
+msgstr "<center>Loading.. Stay calm!</center> <br> <center>(っ⌒‿⌒)っ</center>"
 
 #: ../qml/Main.qml:336
 msgid "errorMessage"
-msgstr ""
+msgstr "uhm... seems like this site does not exist, it might also be bug <br> ¯_( ͡❛ ͜ʖ ͡❛)_/¯"
 
 #: Gem.desktop.in.h:1
 msgid "Gem"

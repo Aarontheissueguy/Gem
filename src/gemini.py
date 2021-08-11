@@ -321,7 +321,7 @@ class Gemini:
                 pyotherside.send('onLoad', gophsite, scroll_height)
             except Exception as e:
                 print("Error:", e)
-                pyotherside.send('onLoad', "uhm... seems like this site does not exist, it might also be bug <br> ¯\_( ͡❛ ͜ʖ ͡❛)_/¯")
+                pyotherside.send('onLoadError')
             return;
 
 
@@ -338,7 +338,7 @@ class Gemini:
             pyotherside.send('onLoad', gemsite, scroll_height)
         except Exception as e:
             print("Error:", e)
-            pyotherside.send('onLoad', "uhm... seems like this site does not exist, it might also be bug <br> ¯\_( ͡❛ ͜ʖ ͡❛)_/¯")
+            pyotherside.send('onLoadError')
 
         return;
 
