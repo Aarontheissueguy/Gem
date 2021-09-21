@@ -279,6 +279,7 @@ class Gemini:
         else:
             home_page = self.create_page_context("gemini://gemini.circumlunar.space/servers/", 0)
             self.load(home_page)
+            self.history.append(home_page)
 
     def cache_page(self, url, content):
         cache_obj = {}
