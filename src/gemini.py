@@ -154,6 +154,7 @@ class Gemini:
 
     def instert_html_links(self, body, links):
         mdBody = ""
+        inside_pre_block = False
         for line in body.splitlines():
             if "=>" in line:
                 try:
@@ -182,12 +183,21 @@ class Gemini:
                     mdBody += line
                 else:
                     pass
+            elif "```" in line:
+                print(line, flush=True)
+                if inside_pre_block:
+                    mdBody += "</pre>"
+                    inside_pre_block = False
+                else:
+                    mdBody += "<pre style='font-size: 12px'>"
+                    inside_pre_block = True
 
             else:
+                mdBody += line
+                mdBody += "\n"
+                if not inside_pre_block:
                 #print("nolink")
-                mdBody += line + "\n"
-                mdBody += "<br>"
-                mdBody += "<br>"
+                    mdBody += "<br>"
         return mdBody
 
     def top(self, stack):
