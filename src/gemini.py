@@ -156,7 +156,7 @@ class Gemini:
         mdBody = ""
         inside_pre_block = False
         for line in body.splitlines():
-            if "=>" in line:
+            if "=>" in line and not inside_pre_block:
                 try:
                     line =  '<a style="color: #FFC0CB" href="'+links[0]+'">'+line+'</a>'
                     del links[0]
@@ -168,7 +168,7 @@ class Gemini:
                     mdBody += line
                     #print("err")
                     pass
-            elif line.startswith("#"):
+            elif line.startswith("#") and not inside_pre_block:
                 if line.startswith("###"):
                     line = line.replace("###", "<h3>")
                     line += "</h3>"
@@ -189,7 +189,7 @@ class Gemini:
                     mdBody += "</pre>"
                     inside_pre_block = False
                 else:
-                    mdBody += "<pre style='font-size: 12px'>"
+                    mdBody += "<pre style='font-size: 16px; font-family: monospace'>"
                     inside_pre_block = True
 
             else:
