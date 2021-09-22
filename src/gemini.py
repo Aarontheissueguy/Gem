@@ -184,12 +184,11 @@ class Gemini:
                 else:
                     pass
             elif "```" in line:
-                print(line, flush=True)
                 if inside_pre_block:
                     mdBody += "</pre>"
                     inside_pre_block = False
                 else:
-                    mdBody += "<pre style='font-size: 16px; font-family: monospace'>"
+                    mdBody += "<pre style='font-family: monospace'>"
                     inside_pre_block = True
 
             else:
