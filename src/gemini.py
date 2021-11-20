@@ -154,8 +154,9 @@ class Gemini:
 
     def instert_html_links(self, body, links):
         mdBody = ""
+        inside_pre_block = False
         for line in body.splitlines():
-            if "=>" in line:
+            if "=>" in line and not inside_pre_block:
                 try:
                     line =  '<a style="color: #FFC0CB" href="'+links[0]+'">'+line+'</a>'
                     del links[0]
@@ -167,7 +168,7 @@ class Gemini:
                     mdBody += line
                     #print("err")
                     pass
-            elif line.startswith("#"):
+            elif line.startswith("#") and not inside_pre_block:
                 if line.startswith("###"):
                     line = line.replace("###", "<h3>")
                     line += "</h3>"
@@ -182,12 +183,20 @@ class Gemini:
                     mdBody += line
                 else:
                     pass
+            elif "```" in line:
+                if inside_pre_block:
+                    mdBody += "</pre>"
+                    inside_pre_block = False
+                else:
+                    mdBody += "<pre style='font-family: monospace'>"
+                    inside_pre_block = True
 
             else:
+                mdBody += line
+                mdBody += "\n"
+                if not inside_pre_block:
                 #print("nolink")
-                mdBody += line + "\n"
-                mdBody += "<br>"
-                mdBody += "<br>"
+                    mdBody += "<br>"
         return mdBody
 
     def top(self, stack):
@@ -269,6 +278,7 @@ class Gemini:
         else:
             home_page = self.create_page_context("gemini://gemini.circumlunar.space/servers/", 0)
             self.load(home_page)
+            self.history.append(home_page)
 
     def cache_page(self, url, content):
         cache_obj = {}
